@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tbroles {
+  PK_role   Int       @id @default(autoincrement())
+  role      String    @unique @db.VarChar(50)
+  status    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  tbusers   tbusers[]
+}
+
+model tbusers {
+  PK_user       Int             @id @default(autoincrement())
+  FK_role       Int 
+  CI            String          @unique @db.VarChar(20)
+  firstName     String          @db.VarChar(80)
+  lastName      String          @db.VarChar(80)
+  email         String          @unique @db.VarChar(255)
+  password      String          @db.VarChar(255)
+  profileImage  String?         @db.VarChar(255)
+  status        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime?
+  tbroles       tbroles         @relation(fields: [FK_role], references: [PK_role])
+  tbuserdetails tbuserdetails[]
+}
+
+model tbuserdetails {
+  PK_detail   Int       @id @default(autoincrement())
+  FK_user     Int   @unique
+  phoneNumber String?   @db.VarChar(15)
+  address     String?   @db.VarChar(255)
+  dateOfBirth DateTime?
+  hireDate    DateTime?
+  position    String?   @db.VarChar(80)
+  salary      String    @db.VarChar(30)
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+
+  tbusers tbusers @relation(fields: [FK_user], references: [PK_user])
+}
