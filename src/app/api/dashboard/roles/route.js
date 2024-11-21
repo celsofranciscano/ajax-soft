@@ -1,18 +1,58 @@
-
-import prisma from "@/connection/db";
 import { NextResponse } from "next/server";
+import prisma from "@/libs/db";
 
 
-export async function GET(request) {
+export async function GET() {
   try {
-    console.log("Iniciando solicitud GET para roles...");
-
     const roles = await prisma.tbroles.findMany();
-    console.log("Roles obtenidos exitosamente:", roles);
-
-    return NextResponse.json(roles, { status: 200 });
+    return NextResponse.json(roles);
   } catch (error) {
-    console.error("Error en el método GET para roles:", error.message);
-    return NextResponse.json({ error: "Error al obtener los roles" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function POST(request) {
+  try {
+    const { role } = await request.json();
+
+    if (!role) {
+      return NextResponse.json(
+        { message: "El campo 'role' es obligatorio" },
+        { status: 400 }
+      );
+    }
+
+    const roleExists = await prisma.tbroles.findUnique({
+      where: {
+        role: role,
+      },
+    });
+
+    if (roleExists) {
+      return NextResponse.json(
+        { message: "El rol ya existe" },
+        { status: 400 }
+      );
+    }
+
+    const newRole = await prisma.tbroles.create({
+      data: {
+        role,
+      },
+    });
+
+    return NextResponse.json(newRole);
+  } catch {
+    return NextResponse.json(
+      { message: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }

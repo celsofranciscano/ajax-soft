@@ -3,13 +3,16 @@ import prisma from "@/libs/db";
 
 export async function GET(request, { params }) {
   try {
-    const role = await prisma.tbroles.findUnique({
+    const userDetails = await prisma.tbuserdetails.findUnique({
       where: {
-        PK_role: Number(params.PK_role),
+        FK_user: Number(params.PK_user),
       },
     });
-    return NextResponse.json(role);
+
+    console.log(userDetails)
+    return NextResponse.json(userDetails);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       {
         error: error.message,
@@ -20,3 +23,5 @@ export async function GET(request, { params }) {
     );
   }
 }
+
+
