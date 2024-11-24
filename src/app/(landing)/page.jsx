@@ -18,35 +18,35 @@ const PortfolioComplete = () => {
     {
       name: "Celso Franciscano",
       role: "CEO & Fundador",
-      image: "https://via.placeholder.com/150",
+      image: "https://drive.google.com/file/d/1FMII1n67Hjv-erJnUOIOXoFDuq-cMmiZ/view?usp=drivesdk/150",
       bio: "Apasionado por liderar proyectos innovadores. Más de 10 años de experiencia en desarrollo de software.",
       projects: ["Sistema de Gestión Empresarial", "Aplicación de Comercio Electrónico"],
     },
     {
       name: "Oscar Flores",
       role: "Gerente de Proyecto",
-      image: "https://via.placeholder.com/150",
+      image: "https://drive.google.com/file/d/1FKIS8s62Usjmyv7U8Noj46bi2m70WJPu/view?usp=drivesdk/150",
       bio: "Gestionando proyectos tecnológicos con enfoque en productividad y eficiencia.",
       projects: ["Plataforma de Colaboración", "CRM para PyMEs"],
     },
     {
       name: "Andres Rocha",
       role: "Desarrollador Full Stack",
-      image: "https://via.placeholder.com/150",
+      image: "https://drive.google.com/file/d/1FNzSmhhMDrBclrFE51nIoAdNfdgQykFI/view?usp=drivesdk/150",
       bio: "Especialista en tecnologías frontend y backend. Apasionado por el desarrollo web.",
       projects: ["Sistema de Reservas Online", "Dashboard Analítico"],
     },
     {
       name: "Adam Choquetarqui",
       role: "Diseñador UI/UX",
-      image: "https://via.placeholder.com/150",
+      image: "https://drive.google.com/file/d/1FNzSmhhMDrBclrFE51nIoAdNfdgQykFI/view?usp=drivesdk/150",
       bio: "Creando experiencias visuales atractivas y funcionales para aplicaciones web y móviles.",
       projects: ["Diseño para E-commerce", "Interfaz de Usuario de App Fitness"],
     },
     {
       name: "Dylan Castro",
       role: "Científico de Datos",
-      image: "https://via.placeholder.com/150",
+      image: "https://drive.google.com/file/d/1FNzSmhhMDrBclrFE51nIoAdNfdgQykFI/view?usp=drivesdk/150",
       bio: "Transformando datos en conocimiento, con experiencia en inteligencia artificial.",
       projects: ["Análisis Predictivo de Ventas", "Sistema de Recomendaciones"],
     },
@@ -161,7 +161,7 @@ const PortfolioComplete = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-cover bg-center h-80 flex items-center justify-center relative" style={{ backgroundImage: "url('https://via.placeholder.com/1200x400')" }}>
+      <section className="bg-cover bg-center h-80 flex items-center justify-center relative" style={{ backgroundImage: "url('https://arctic-council.org/site/assets/files/9090/craig-mckay-gndl-el3n00-unsplash.1200x400.webp/1200x400')" }}>
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="relative text-center z-10">
           <h2 className="text-5xl font-bold mb-4 text-white">Bienvenidos a Ajax-Soft</h2>
