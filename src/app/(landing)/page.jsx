@@ -247,7 +247,7 @@ const PortfolioComplete = () => {
               Facebook
             </a>
             <a
-              href="https://www.instagram.com/"
+              href="https://www.instagram.com/accounts/login/?source=auth_switcher&locale=es_ES/"
               className="bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
             >
               Instagram
