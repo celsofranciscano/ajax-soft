@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
+// Funcion para manejar errores de forma centralizada
 function handleError(error, message = "Error interno del servidor", status = 500) {
-  console.error(`[ERROR] ${message}`, error); 
   return NextResponse.json(
     {
-      success: false,
       message,
       error: error.message || "Error desconocido",
     },
@@ -13,90 +12,81 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-async function validateRequestBody(request, requiredFields) {
-  try {
-    const body = await request.json();
-    const missingFields = requiredFields.filter((field) => !body[field]);
+// Funcion para validar el cuerpo de la solicitud con reglas
+function validateRequestBodyWithRules(body, rules) {
+  const errors = [];
+  const validatedData = {};
 
-    if (missingFields.length > 0) {
-      return {
-        valid: false,
-        error: `Faltan los campos requeridos: ${missingFields.join(", ")}`,
-      };
+  for (const field in rules) {
+    const rule = rules[field];
+    const value = body[field];
+
+    if (rule.required && (value === undefined || value === null)) {
+      errors.push(`El campo '${field}' es obligatorio.`);
+      continue;
     }
 
-    return { valid: true, body };
-  } catch (error) {
-    return {
-      valid: false,
-      error: "Cuerpo de la solicitud no es válido JSON o está vacío",
-    };
+    if (value !== undefined) {
+      if (rule.type && typeof value !== rule.type) {
+        errors.push(`El campo '${field}' debe ser de tipo ${rule.type}.`);
+        continue;
+      }
+
+      if (rule.minLength && value.length < rule.minLength) {
+        errors.push(`El campo '${field}' debe tener al menos ${rule.minLength} caracteres.`);
+        continue;
+      }
+
+      if (rule.maxLength && value.length > rule.maxLength) {
+        errors.push(`El campo '${field}' no debe exceder los ${rule.maxLength} caracteres.`);
+        continue;
+      }
+    }
+
+    validatedData[field] = value;
   }
+
+  return { valid: errors.length === 0, errors, validatedData };
 }
 
-export async function GET() {
-    try {
-      const roles = await prisma.tbroles.findMany({
-        orderBy: { createdAt: "desc" },
-      });
-  
-      return NextResponse.json(
-        { success: true, data: roles },
-        { status: 200 }
-      );
-    } catch (error) {
-      console.error("[ERROR] Error al obtener roles:", error);
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Error al obtener los roles",
-          error: error.message,
-        },
-        { status: 500 }
-      );
-    }
-  }
-  
+// metedo post: Crear un nuevo rol
+export async function POST(request) {
+  try {
+    const body = await request.json();
 
-  export async function POST(request) {
-    try {
-      //console.log("[INFO] Iniciando solicitud POST para crear un nuevo rol...");
-  
-      const { role } = await request.json();
-  
-      if (!role || typeof role !== "string") {
-        return NextResponse.json(
-          { success: false, message: "El campo 'role' es obligatorio y debe ser una cadena de texto" },
-          { status: 400 }
-        );
-      }
-  
-      const roleExists = await prisma.tbroles.findUnique({
-        where: { role },
-      });
-  
-      if (roleExists) {
-        return NextResponse.json(
-          { success: false, message: `El rol '${role}' ya existe` },
-          { status: 400 }
-        );
-      }
-  
-      const newRole = await prisma.tbroles.create({
-        data: { role },
-      });
-  
-      //console.log("[SUCCESS] Rol creado exitosamente en la base de datos:", newRole);
-  
+    // Validar el cuerpo con reglas
+    const validation = validateRequestBodyWithRules(body, {
+      role: { required: true, type: "string", minLength: 3, maxLength: 50 },
+    });
+
+    if (!validation.valid) {
       return NextResponse.json(
-        { success: true, data: newRole },
-        { status: 201 }
-      );
-    } catch (error) {
-      console.error("[ERROR] Error al crear el rol:", error);
-      return NextResponse.json(
-        { success: false, message: "Error al crear el rol", error: error.message },
-        { status: 500 }
+        { message: "Errores de validación", errors: validation.errors },
+        { status: 400 }
       );
     }
+
+    const { role } = validation.validatedData;
+
+    //verificacion de duplicados
+    const roleExists = await prisma.tbroles.findUnique({
+      where: { role },
+    });
+
+    if (roleExists) {
+      return NextResponse.json(
+        { message: `El rol '${role}' ya existe` },
+        { status: 400 }
+      );
+    }
+
+    // cracion de rol
+    const newRole = await prisma.tbroles.create({
+      data: { role },
+    });
+
+    return NextResponse.json(newRole, { status: 201 });
+  } catch (error) {
+    return handleError(error, "Error al crear el rol");
   }
+}
