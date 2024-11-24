@@ -4,8 +4,6 @@ import prisma from "@/libs/db";
 export async function GET(request, { params }) {
   try {
     console.log("[INFO] Iniciando solicitud GET para obtener un rol específico...");
-
-    // Validar que PK_role sea un número válido
     const PK_role = Number(params.PK_role);
     if (isNaN(PK_role) || PK_role <= 0) {
       return NextResponse.json(

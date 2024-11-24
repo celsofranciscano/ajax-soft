@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
-// Helper para manejar errores
 function handleError(error, message = "Error interno del servidor", status = 500) {
-  console.error(`[ERROR] ${message}`, error); // Log detallado del error
+  console.error(`[ERROR] ${message}`, error); 
   return NextResponse.json(
     {
       success: false,
@@ -14,7 +13,6 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// Middleware para validar el cuerpo de la solicitud
 async function validateRequestBody(request, requiredFields) {
   try {
     const body = await request.json();
@@ -38,13 +36,9 @@ async function validateRequestBody(request, requiredFields) {
 
 export async function GET() {
     try {
-      console.log("[INFO] Iniciando solicitud GET para obtener roles...");
-  
       const roles = await prisma.tbroles.findMany({
         orderBy: { createdAt: "desc" },
       });
-  
-      console.log("[DEBUG] Datos obtenidos de la base de datos:", roles);
   
       return NextResponse.json(
         { success: true, data: roles },
@@ -66,7 +60,7 @@ export async function GET() {
 
   export async function POST(request) {
     try {
-      console.log("[INFO] Iniciando solicitud POST para crear un nuevo rol...");
+      //console.log("[INFO] Iniciando solicitud POST para crear un nuevo rol...");
   
       const { role } = await request.json();
   
@@ -92,7 +86,7 @@ export async function GET() {
         data: { role },
       });
   
-      console.log("[SUCCESS] Rol creado exitosamente en la base de datos:", newRole);
+      //console.log("[SUCCESS] Rol creado exitosamente en la base de datos:", newRole);
   
       return NextResponse.json(
         { success: true, data: newRole },
