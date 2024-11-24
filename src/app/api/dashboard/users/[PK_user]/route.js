@@ -98,7 +98,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// Metodo put
+// Metodo put xd
 export async function PUT(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
