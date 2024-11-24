@@ -13,7 +13,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// calidacion dinamgit add .ico PK_user
+// calidacion dinmico PK_user
 function validatePKUser(PK_user) {
   const id = Number(PK_user);
   if (isNaN(id) || id <= 0) {
