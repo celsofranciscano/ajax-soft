@@ -80,7 +80,7 @@ export async function POST(request) {
       );
     }
 
-    // cracion de rol
+    // cracion de 
     const newRole = await prisma.tbroles.create({
       data: { role },
     });
