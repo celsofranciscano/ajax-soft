@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer components {
+    .input-ligth {
+      @apply bg-zinc-100  border border-zinc-200  rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:border-transparent;
+    }
+  }
+  @layer components {
+    .input-dark {
+      @apply py-2
+      text-black
+      dark:text-white
+          bg-white
+          rounded-md
+          px-4
+          dark:bg-zinc-950
+          border
+          dark:border-zinc-800
+          focus:outline-none
+          focus-visible:ring-1
+          focus-visible:ring-zinc-500
+          focus-visible:border-none
+          placeholder:text-zinc-500;
+    }
+  }
+  
+  /* styles.css */
+  details[open] summary svg {
+    transform: rotate(180deg);
+  }
+  

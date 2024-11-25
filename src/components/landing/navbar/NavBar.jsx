@@ -12,7 +12,7 @@ function NavBar() {
 
   return (
     <>
-      <header className="bg-zinc-950 border border-zinc-900 h-16 shadow-sm  text-white fixed w-full flex items-center justify-between px-4 md:px-8">
+      <header className="bg-zinc-950 border z-20 border-zinc-900 h-16 shadow-sm  text-white fixed w-full flex items-center justify-between px-4 md:px-8">
         <a className="flex gap-1 items-center" href="/dashboard">
           <img className="w-12" src="/logo.webp" alt="logo ajaxsoft" />
           <span className="text-2xl font-medium text-white ">AjaxSoft</span>
