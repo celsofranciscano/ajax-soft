@@ -45,49 +45,43 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todas las compañías
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const companies = await prisma.tbcompanies.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
+        PK_company: true,
+        companyName: true,
+        industry: true,
+        address: true,
+        website: true,
+        category: true,
         description: true,
-        technologies: true,
-        results: true,
-        stages: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
-          select: {
-            PK_job: true,
-            jobTitle: true,
-          },
-        },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(companies, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener las compañías");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear una nueva compañía
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
-      description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
+      companyName: { required: true, type: "string", maxLength: 100 },
+      industry: { required: true, type: "string", maxLength: 50 },
+      address: { required: true, type: "string", maxLength: 100 },
+      website: { required: true, type: "string", maxLength: 100 },
+      category: { required: true, type: "string", maxLength: 20 },
+      description: { required: true, type: "string", maxLength: 500 },
       status: { required: true, type: "boolean" },
     });
 
@@ -99,42 +93,36 @@ export async function POST(request) {
     }
 
     const {
-      FK_job,
-      projectName,
+      companyName,
+      industry,
+      address,
+      website,
+      category,
       description,
-      technologies,
-      results,
-      stages,
       status,
     } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
-    });
-
-    if (!jobExists) {
-      return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
-        { status: 404 }
-      );
-    }
-
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear la nueva compañía
+    const newCompany = await prisma.tbcompanies.create({
       data: {
-        FK_job,
-        projectName,
+        companyName,
+        industry,
+        address,
+        website,
+        category,
         description,
-        technologies,
-        results,
-        stages,
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newCompany, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { message: "El nombre de la compañía ya está registrado." },
+        { status: 400 }
+      );
+    }
+    return handleError(error, "Error al registrar la compañía");
   }
 }

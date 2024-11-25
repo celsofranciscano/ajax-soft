@@ -45,21 +45,25 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todas las postulaciones
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const submits = await prisma.tbsubmits.findMany({
       select: {
-        PK_project: true,
+        PK_submit: true,
+        FK_user: true,
         FK_job: true,
-        projectName: true,
-        description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        submitDate: true,
         status: true,
         createdAt: true,
         updatedAt: true,
+        tbUsers: {
+          select: {
+            PK_user: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         tbJobs: {
           select: {
             PK_job: true,
@@ -69,26 +73,23 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(submits, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener las postulaciones");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear una nueva postulación
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
+      FK_user: { required: true, type: "number" },
       FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
-      description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
-      status: { required: true, type: "boolean" },
+      submitDate: { required: true, type: "string", regex: /^\d{4}-\d{2}-\d{2}$/ },
+      status: { required: false, type: "string", maxLength: 20 },
     });
 
     if (!validation.valid) {
@@ -98,17 +99,21 @@ export async function POST(request) {
       );
     }
 
-    const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
-      status,
-    } = validation.validatedData;
+    const { FK_user, FK_job, submitDate, status } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
+    // Verificar si el usuario existe
+    const userExists = await prisma.tbUsers.findUnique({
+      where: { PK_user: FK_user },
+    });
+
+    if (!userExists) {
+      return NextResponse.json(
+        { message: `No se encontró un usuario con FK_user: ${FK_user}` },
+        { status: 404 }
+      );
+    }
+
+    // Verificar si el trabajo existe
     const jobExists = await prisma.tbJobs.findUnique({
       where: { PK_job: FK_job },
     });
@@ -120,21 +125,18 @@ export async function POST(request) {
       );
     }
 
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear la nueva postulación
+    const newSubmit = await prisma.tbsubmits.create({
       data: {
+        FK_user,
         FK_job,
-        projectName,
-        description,
-        technologies,
-        results,
-        stages,
-        status,
+        submitDate: new Date(submitDate),
+        status: status ?? "En revisión", // Valor por defecto si no se especifica
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newSubmit, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    return handleError(error, "Error al registrar la postulación");
   }
 }

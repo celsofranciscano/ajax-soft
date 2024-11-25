@@ -45,49 +45,37 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todos los servicios
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const services = await prisma.tbServices.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
+        PK_service: true,
+        serviceName: true,
         description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        valueAdded: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
-          select: {
-            PK_job: true,
-            jobTitle: true,
-          },
-        },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(services, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener los servicios");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear un nuevo servicio
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
+      serviceName: { required: true, type: "string", maxLength: 255 },
       description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
+      valueAdded: { required: true, type: "string" },
       status: { required: true, type: "boolean" },
     });
 
@@ -98,43 +86,26 @@ export async function POST(request) {
       );
     }
 
-    const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
-      status,
-    } = validation.validatedData;
+    const { serviceName, description, valueAdded, status } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
-    });
-
-    if (!jobExists) {
-      return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
-        { status: 404 }
-      );
-    }
-
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear el nuevo servicio
+    const newService = await prisma.tbServices.create({
       data: {
-        FK_job,
-        projectName,
+        serviceName,
         description,
-        technologies,
-        results,
-        stages,
+        valueAdded,
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newService, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { message: "El nombre del servicio ya está registrado." },
+        { status: 400 }
+      );
+    }
+    return handleError(error, "Error al registrar el servicio");
   }
 }

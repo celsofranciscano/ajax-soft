@@ -45,50 +45,44 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todas las tareas
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const tasks = await prisma.tbTasks.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
+        PK_task: true,
+        FK_project: true,
         description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        timeExpected: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
+        tbProjects: {
           select: {
-            PK_job: true,
-            jobTitle: true,
+            PK_project: true,
+            projectName: true,
           },
         },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(tasks, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener las tareas");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear una nueva tarea
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
+      FK_project: { required: true, type: "number" },
       description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
-      status: { required: true, type: "boolean" },
+      timeExpected: { required: true, type: "string", maxLength: 50 },
+      status: { required: true, type: "string", maxLength: 20 },
     });
 
     if (!validation.valid) {
@@ -98,43 +92,38 @@ export async function POST(request) {
       );
     }
 
-    const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
-      status,
-    } = validation.validatedData;
+    const { FK_project, description, timeExpected, status } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
+    // Verificar si el proyecto asociado existe
+    const projectExists = await prisma.tbProjects.findUnique({
+      where: { PK_project: FK_project },
     });
 
-    if (!jobExists) {
+    if (!projectExists) {
       return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
+        { message: `No se encontró un proyecto con FK_project: ${FK_project}` },
         { status: 404 }
       );
     }
 
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear la nueva tarea
+    const newTask = await prisma.tbTasks.create({
       data: {
-        FK_job,
-        projectName,
+        FK_project,
         description,
-        technologies,
-        results,
-        stages,
+        timeExpected,
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { message: "Ya existe una tarea con la misma descripción en este proyecto." },
+        { status: 400 }
+      );
+    }
+    return handleError(error, "Error al registrar la tarea");
   }
 }

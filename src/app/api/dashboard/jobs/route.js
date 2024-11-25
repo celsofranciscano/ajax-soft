@@ -37,6 +37,11 @@ function validateRequestBody(body, rules) {
         errors.push(`El campo '${field}' no debe exceder los ${rule.maxLength} caracteres.`);
         continue;
       }
+
+      if (rule.regex && !rule.regex.test(value)) {
+        errors.push(`El campo '${field}' tiene un formato inválido.`);
+        continue;
+      }
     }
 
     validatedData[field] = value;
@@ -45,49 +50,50 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todos los trabajos
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const jobs = await prisma.tbJobs.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
-        description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        PK_job: true,
+        FK_company: true,
+        jobTitle: true,
+        jobDescription: true,
+        jobRequirements: true,
+        locationIrl: true,
+        salary: true,
+        closeDate: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
+        tbcompanies: {
           select: {
-            PK_job: true,
-            jobTitle: true,
+            companyName: true,
           },
         },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(jobs, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener los trabajos");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear un nuevo trabajo
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
-      description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
+      FK_company: { required: true, type: "number" },
+      jobTitle: { required: true, type: "string", maxLength: 100 },
+      jobDescription: { required: true, type: "string", maxLength: 500 },
+      jobRequirements: { required: true, type: "string", maxLength: 500 },
+      locationIrl: { required: true, type: "string", maxLength: 100 },
+      salary: { required: true, type: "number" },
+      closeDate: { required: true, type: "string", regex: /^\d{4}-\d{2}-\d{2}$/ }, // YYYY-MM-DD
       status: { required: true, type: "boolean" },
     });
 
@@ -99,42 +105,44 @@ export async function POST(request) {
     }
 
     const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
+      FK_company,
+      jobTitle,
+      jobDescription,
+      jobRequirements,
+      locationIrl,
+      salary,
+      closeDate,
       status,
     } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
+    // Verificar si la compañía existe
+    const companyExists = await prisma.tbcompanies.findUnique({
+      where: { PK_company: FK_company },
     });
 
-    if (!jobExists) {
+    if (!companyExists) {
       return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
+        { message: `No se encontró una compañía con FK_company: ${FK_company}` },
         { status: 404 }
       );
     }
 
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear el nuevo trabajo
+    const newJob = await prisma.tbJobs.create({
       data: {
-        FK_job,
-        projectName,
-        description,
-        technologies,
-        results,
-        stages,
+        FK_company,
+        jobTitle,
+        jobDescription,
+        jobRequirements,
+        locationIrl,
+        salary: parseFloat(salary), // Convertir salario a número decimal
+        closeDate: new Date(closeDate),
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newJob, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    return handleError(error, "Error al registrar el trabajo");
   }
 }

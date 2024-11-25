@@ -13,7 +13,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// Validar cuerpo de la solicitud con reglas específicas
+// Validar cuerpo de la solicitud con reglas
 function validateRequestBody(body, rules) {
   const errors = [];
   const validatedData = {};
@@ -45,49 +45,47 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todas las experiencias
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const experiences = await prisma.tbExperiences.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
-        description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        PK_experience: true,
+        FK_user: true,
+        roleAssignet: true,
+        initialDate: true,
+        finalDate: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
+        tbUsers: {
           select: {
-            PK_job: true,
-            jobTitle: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(experiences, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener las experiencias");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear una nueva experiencia
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
-      description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
+      FK_user: { required: true, type: "number" },
+      roleAssignet: { required: true, type: "string", maxLength: 10 },
+      initialDate: { required: true, type: "string" }, // Se espera una fecha en formato ISO
+      finalDate: { required: true, type: "string" }, // Se espera una fecha en formato ISO
       status: { required: true, type: "boolean" },
     });
 
@@ -98,43 +96,39 @@ export async function POST(request) {
       );
     }
 
-    const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
-      status,
-    } = validation.validatedData;
+    const { FK_user, roleAssignet, initialDate, finalDate, status } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
+    // Verificar si el usuario asociado existe
+    const userExists = await prisma.tbUsers.findUnique({
+      where: { PK_user: FK_user },
     });
 
-    if (!jobExists) {
+    if (!userExists) {
       return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
+        { message: `No se encontró un usuario con FK_user: ${FK_user}` },
         { status: 404 }
       );
     }
 
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear la nueva experiencia
+    const newExperience = await prisma.tbExperiences.create({
       data: {
-        FK_job,
-        projectName,
-        description,
-        technologies,
-        results,
-        stages,
+        FK_user,
+        roleAssignet,
+        initialDate: new Date(initialDate),
+        finalDate: new Date(finalDate),
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newExperience, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { message: "La experiencia ya está registrada." },
+        { status: 400 }
+      );
+    }
+    return handleError(error, "Error al registrar la experiencia");
   }
 }

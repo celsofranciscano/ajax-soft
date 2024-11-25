@@ -1,4 +1,4 @@
-"use client";
+"use client";// codigo de react , cuando hay eventos , cuando neseite
 import Link from "next/link";
 import { useEffect } from "react";
 

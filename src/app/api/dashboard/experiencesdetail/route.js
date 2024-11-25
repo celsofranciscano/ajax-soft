@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
-// Función centralizada para manejar errores
+// Función para manejar errores centralizados
 function handleError(error, message = "Error interno del servidor", status = 500) {
   console.error("Error:", error.message || error);
   return NextResponse.json(
@@ -45,49 +45,42 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// Método GET: Obtener todos los proyectos
+// Método GET: Obtener todos los detalles de experiencia
 export async function GET() {
   try {
-    const projects = await prisma.tbProjects.findMany({
+    const experienceDetails = await prisma.tbExperienceDetail.findMany({
       select: {
-        PK_project: true,
-        FK_job: true,
-        projectName: true,
-        description: true,
-        technologies: true,
-        results: true,
-        stages: true,
+        PK_experienceDetail: true,
+        FK_experience: true,
+        personalAchievements: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        tbJobs: {
+        tbExperiences: {
           select: {
-            PK_job: true,
-            jobTitle: true,
+            PK_experience: true,
+            FK_user: true,
+            roleAssignet: true,
           },
         },
       },
     });
 
-    return NextResponse.json(projects, { status: 200 });
+    return NextResponse.json(experienceDetails, { status: 200 });
   } catch (error) {
-    return handleError(error, "Error al obtener los proyectos");
+    return handleError(error, "Error al obtener los detalles de experiencia");
   }
 }
 
-// Método POST: Crear un nuevo proyecto
+// Método POST: Crear un nuevo detalle de experiencia
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_job: { required: true, type: "number" },
-      projectName: { required: true, type: "string", maxLength: 255 },
-      description: { required: true, type: "string" },
-      technologies: { required: true, type: "string" },
-      results: { required: true, type: "string" },
-      stages: { required: true, type: "string", maxLength: 255 },
+      FK_experience: { required: true, type: "number" },
+      personalAchievements: { required: true, type: "string", maxLength: 200 },
       status: { required: true, type: "boolean" },
     });
 
@@ -98,43 +91,31 @@ export async function POST(request) {
       );
     }
 
-    const {
-      FK_job,
-      projectName,
-      description,
-      technologies,
-      results,
-      stages,
-      status,
-    } = validation.validatedData;
+    const { FK_experience, personalAchievements, status } = validation.validatedData;
 
-    // Verificar si el trabajo asociado existe
-    const jobExists = await prisma.tbJobs.findUnique({
-      where: { PK_job: FK_job },
+    // Verificar si la experiencia asociada existe
+    const experienceExists = await prisma.tbExperiences.findUnique({
+      where: { PK_experience: FK_experience },
     });
 
-    if (!jobExists) {
+    if (!experienceExists) {
       return NextResponse.json(
-        { message: `No se encontró un trabajo con FK_job: ${FK_job}` },
+        { message: `No se encontró una experiencia con FK_experience: ${FK_experience}` },
         { status: 404 }
       );
     }
 
-    // Crear el nuevo proyecto
-    const newProject = await prisma.tbProjects.create({
+    // Crear el nuevo detalle de experiencia
+    const newExperienceDetail = await prisma.tbExperienceDetail.create({
       data: {
-        FK_job,
-        projectName,
-        description,
-        technologies,
-        results,
-        stages,
+        FK_experience,
+        personalAchievements,
         status,
       },
     });
 
-    return NextResponse.json(newProject, { status: 201 });
+    return NextResponse.json(newExperienceDetail, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al registrar el proyecto");
+    return handleError(error, "Error al registrar el detalle de experiencia");
   }
 }

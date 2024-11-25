@@ -7,53 +7,169 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model tbdepartments {
-  PK_department Int       @id @default(autoincrement())
-  department    String    @db.VarChar(100)
-  description   String?   @db.VarChar(255)
-  status        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime?
-  tbroles       tbroles[]
+model tbUsers {
+  PK_user            Int                 @id @default(autoincrement())
+  username           String
+  email              String              @unique
+  password           String
+  firstName          String              @db.VarChar(10)
+  lastName           String              @db.VarChar(10)
+  career             String              @db.VarChar(20)
+  age                Int
+  linkedin           String              @db.VarChar(20)
+  expertiseParagraph String              @db.VarChar(500)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  status             Boolean
+  tbroles            tbroles[]
+  tbsubmits          tbsubmits[]
+  tbExperiences      tbExperiences[]
+  tbuserdetails      tbuserdetails?      @relation("UserDetails") // Agregado
+}
+
+model tbadmins {
+  PK_admin   Int      @id @default(autoincrement())
+  userName   String   @db.VarChar(20)
+  firstName  String   @db.VarChar(10)
+  lastName   String   @db.VarChar(10)
+  email      String   @unique
+  password   String
+  status     Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model tbroles {
-  PK_role       Int           @id @default(autoincrement())
-  FK_department Int
-  role          String        @db.VarChar(100)
-  description   String?       @db.VarChar(255)
-  status        Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime?
-  tbdepartments tbdepartments @relation(fields: [FK_department], references: [PK_department])
-  tbusers       tbusers[]
+  PK_role    Int      @id @default(autoincrement())
+  FK_user    Int
+  role       String   @db.VarChar(20)
+  status     Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tbUsers    tbUsers  @relation(fields: [FK_user], references: [PK_user])
 }
 
-model tbprivileges {
-  PK_privilege Int       @id @default(autoincrement())
-  privilege    String    @unique @db.VarChar(50)
-  status       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime?
-  tbusers      tbusers[]
+model tbcompanies {
+  PK_company   Int      @id @default(autoincrement())
+  companyName  String   @db.VarChar(100)
+  industry     String   @db.VarChar(50)
+  address      String   @db.VarChar(100)
+  website      String   @db.VarChar(100)
+  category     String   @db.VarChar(20)
+  description  String   @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  status       Boolean
+  tbJobs       tbJobs[]
 }
 
-model tbusers {
-  PK_user       Int             @id @default(autoincrement())
-  FK_privilege  Int
-  FK_role       Int
-  CI            String          @unique @db.VarChar(20)
-  firstName     String          @db.VarChar(80)
-  lastName      String          @db.VarChar(80)
-  email         String          @unique @db.VarChar(255)
-  password      String          @db.VarChar(255)
-  profileImage  String?         @db.VarChar(255)
-  status        Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime?
-  tbprivileges  tbprivileges    @relation(fields: [FK_privilege], references: [PK_privilege])
-  tbroles       tbroles         @relation(fields: [FK_role], references: [PK_role])
-  tbuserdetails tbuserdetails[]
+model tbJobs {
+  PK_job          Int      @id @default(autoincrement())
+  FK_company      Int
+  jobTitle        String   @db.VarChar(100)
+  jobDescription  String   @db.VarChar(500)
+  jobRequirements String   @db.VarChar(500)
+  locationIrl     String   @db.VarChar(100)
+  salary          Decimal  @db.Decimal(10, 2)
+  closeDate       DateTime
+  status          Boolean
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tbcompanies     tbcompanies @relation(fields: [FK_company], references: [PK_company])
+  tbsubmits       tbsubmits[]
+  tbProjects      tbProjects[]
+}
+
+model tbsubmits {
+  PK_submit  Int      @id @default(autoincrement())
+  FK_user    Int
+  FK_job     Int
+  submitDate DateTime
+  status     String   @default("En revisión") @db.VarChar(20)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tbUsers    tbUsers  @relation(fields: [FK_user], references: [PK_user])
+  tbJobs     tbJobs   @relation(fields: [FK_job], references: [PK_job])
+}
+
+model tbExperiences {
+  PK_experience Int      @id @default(autoincrement())
+  FK_user       Int
+  roleAssignet  String   @db.VarChar(10)
+  initialDate   DateTime
+  finalDate     DateTime
+  status        Boolean
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tbUsers             tbUsers             @relation(fields: [FK_user], references: [PK_user])
+  tbExperienceDetails tbExperienceDetail[]
+}
+
+model tbExperienceDetail {
+  PK_experienceDetail Int      @id @default(autoincrement())
+  FK_experience       Int
+  personalAchievements String  @db.VarChar(200)
+  status              Boolean
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tbExperiences tbExperiences @relation(fields: [FK_experience], references: [PK_experience])
+}
+
+model tbServices {
+  PK_service  Int      @id @default(autoincrement())
+  serviceName String
+  description String   @db.Text
+  valueAdded  String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      Boolean
+  tbProjectServices tbProjectServices[]
+}
+
+model tbProjects {
+  PK_project  Int      @id @default(autoincrement())
+  FK_job      Int
+  projectName String
+  description String   @db.Text
+  technologies String  @db.Text
+  results     String   @db.Text
+  stages      String   @db.VarChar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      Boolean
+
+  tbJobs           tbJobs           @relation(fields: [FK_job], references: [PK_job])
+  tbTasks          tbTasks[]
+  tbProjectServices tbProjectServices[]
+}
+
+model tbTasks {
+  PK_task      Int      @id @default(autoincrement())
+  FK_project   Int
+  description  String   @db.Text
+  timeExpected String   @db.VarChar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      String   @db.VarChar(20)
+
+  tbProjects tbProjects @relation(fields: [FK_project], references: [PK_project])
+}
+
+model tbProjectServices {
+  PK_projectService Int      @id @default(autoincrement())
+  FK_project        Int
+  FK_service        Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  status            String   @db.VarChar(20)
+  
+  tbProjects tbProjects @relation(fields: [FK_project], references: [PK_project])
+  tbServices tbServices @relation(fields: [FK_service], references: [PK_service])
 }
 
 model tbuserdetails {
@@ -72,94 +188,5 @@ model tbuserdetails {
   tbusers     tbusers   @relation(fields: [FK_user], references: [PK_user])
 }
 
-model tbphases {
-  PK_phase    Int        @id @default(autoincrement())
-  phase       String     @db.VarChar(100)
-  description String?    @db.VarChar(255)
-  status      Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime?
-  tbstages    tbstages[]
-}
-
-model tbstages {
-  PK_stage    Int          @id @default(autoincrement())
-  FK_phase    Int
-  stage       String       @db.VarChar(100)
-  description String?      @db.VarChar(255)
-  status      Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime?
-  tbphases    tbphases     @relation(fields: [FK_phase], references: [PK_phase])
-  tbprojects  tbprojects[]
-}
-
-model tbcategories {
-  PK_category Int          @id @default(autoincrement())
-  category    String       @db.VarChar(100)
-  description String?      @db.VarChar(255)
-  status      Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime?
-  tbprojects  tbprojects[]
-}
-
-model tbcustomers {
-  PK_customer  Int          @id @default(autoincrement())
-  business     String       @db.VarChar(80)
-  firstName    String       @db.VarChar(80)
-  lastName     String       @db.VarChar(80)
-  email        String       @unique @db.VarChar(255)
-  phoneNumber  String       @db.VarChar(15)
-  address      String?      @db.VarChar(255)
-  password     String       @db.VarChar(255)
-  profileImage String?      @db.VarChar(255)
-  status       Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime?
-  tbprojects   tbprojects[]
-}
-
-model tbstatus {
-  PK_status   Int          @id @default(autoincrement())
-  status      String       @db.VarChar(50)
-  description String?      @db.VarChar(255)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime?
-  tbprojects  tbprojects[]
-}
-
-model tbprojects {
-  PK_project   Int          @id @default(autoincrement())
-  FK_status    Int
-  FK_customer  Int
-  FK_category  Int
-  FK_stage     Int
-  project      String       @db.VarChar(100)
-  description  String?      @db.VarChar(255)
-  image        String?      @db.VarChar(255)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime?
-  tbstatus     tbstatus?    @relation(fields: [FK_status], references: [PK_status])
-  tbcustomers  tbcustomers  @relation(fields: [FK_customer], references: [PK_customer])
-  tbcategories tbcategories @relation(fields: [FK_category], references: [PK_category])
-  tbstages     tbstages     @relation(fields: [FK_stage], references: [PK_stage])
-
-  tbprojectdetails tbprojectdetails[]
-}
-
-model tbprojectdetails {
-  PK_projectdetails Int         @id @default(autoincrement())
-  FK_project        Int
-  startDate         DateTime
-  endDate           DateTime?
-  deploymentUrl     String?     @db.VarChar(255)
-  cost              Float?
-  estimatedTime     Int?
-  githubUrl         String?     @db.VarChar(255)
-  notionUrl         String?     @db.VarChar(255)
-  figmaUrl          String?     @db.VarChar(255)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime?
-  tbprojects        tbprojects? @relation(fields: [FK_project], references: [PK_project])
+  tbUsers tbUsers @relation("UserDetails", fields: [FK_user], references: [PK_user])
 }
