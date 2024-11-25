@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
-// funcion para manejar errores de forma centralizada
+// Función centralizada para manejar errores
 function handleError(error, message = "Error interno del servidor", status = 500) {
+  console.error(error);
   return NextResponse.json(
     {
       message,
@@ -12,16 +13,16 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// validar parametro de pk_role
+// Validar parámetro de PK_role
 function validatePKRole(PK_role) {
   const id = Number(PK_role);
   if (isNaN(id) || id <= 0) {
-    return { valid: false, error: "El parámetro 'PK_role' debe ser un número válido" };
+    return { valid: false, error: "El parámetro 'PK_role' debe ser un número válido." };
   }
   return { valid: true, id };
 }
 
-// validar cuerpo de la solicitud con reglas, "integracion de datos"
+// Validar cuerpo de la solicitud con reglas específicas
 function validateRequestBody(body, rules) {
   const errors = [];
   const validatedData = {};
@@ -58,7 +59,7 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// metodo post que optiene un rol especifico
+// Método GET: Obtener un rol específico
 export async function GET(request, { params }) {
   try {
     const { valid, id, error } = validatePKRole(params.PK_role);
@@ -68,6 +69,15 @@ export async function GET(request, { params }) {
 
     const role = await prisma.tbroles.findUnique({
       where: { PK_role: id },
+      include: {
+        tbUsers: {
+          select: {
+            PK_user: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!role) {
@@ -83,7 +93,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// metodo put para actualizar un rol completamente
+// Método PUT: Actualizar completamente un rol
 export async function PUT(request, { params }) {
   try {
     const { valid, id, error } = validatePKRole(params.PK_role);
@@ -93,9 +103,9 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    //integracion de los datos
     const validation = validateRequestBody(body, {
-      role: { required: true, type: "string", minLength: 3, maxLength: 50 },
+      FK_user: { required: true, type: "number" },
+      role: { required: true, type: "string", minLength: 3, maxLength: 20 },
       status: { required: true, type: "boolean" },
     });
 
@@ -103,6 +113,18 @@ export async function PUT(request, { params }) {
       return NextResponse.json(
         { message: "Errores de validación", errors: validation.errors },
         { status: 400 }
+      );
+    }
+
+    // Verificar si el usuario asociado existe
+    const userExists = await prisma.tbUsers.findUnique({
+      where: { PK_user: validation.validatedData.FK_user },
+    });
+
+    if (!userExists) {
+      return NextResponse.json(
+        { message: `No se encontró un usuario con PK_user: ${validation.validatedData.FK_user}` },
+        { status: 404 }
       );
     }
 
@@ -117,7 +139,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// metodo patch, para actualizar un rol de forma parcial
+// Método PATCH: Actualizar parcialmente un rol
 export async function PATCH(request, { params }) {
   try {
     const { valid, id, error } = validatePKRole(params.PK_role);
@@ -127,9 +149,9 @@ export async function PATCH(request, { params }) {
 
     const body = await request.json();
 
-    // validar datos de forma flexible
     const validation = validateRequestBody(body, {
-      role: { type: "string", minLength: 3, maxLength: 50 },
+      FK_user: { type: "number" },
+      role: { type: "string", minLength: 3, maxLength: 20 },
       status: { type: "boolean" },
     });
 
@@ -138,6 +160,20 @@ export async function PATCH(request, { params }) {
         { message: "Errores de validación", errors: validation.errors },
         { status: 400 }
       );
+    }
+
+    // Si se proporciona FK_user, validar que el usuario existe
+    if (validation.validatedData.FK_user) {
+      const userExists = await prisma.tbUsers.findUnique({
+        where: { PK_user: validation.validatedData.FK_user },
+      });
+
+      if (!userExists) {
+        return NextResponse.json(
+          { message: `No se encontró un usuario con PK_user: ${validation.validatedData.FK_user}` },
+          { status: 404 }
+        );
+      }
     }
 
     const updatedRole = await prisma.tbroles.update({

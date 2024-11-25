@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
-// Funcion para manejar errores de forma mas centraliazda
+// Función para manejar errores centralizados
 function handleError(error, message = "Error interno del servidor", status = 500) {
+  if (error.code === "P2025") {
+    return NextResponse.json({ message: "Registro no encontrado" }, { status: 404 });
+  }
   return NextResponse.json(
     {
       message,
@@ -12,7 +15,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// Validacion de integracion de datos
+// Validar cuerpo de la solicitud con reglas
 function validateRequestBody(body, rules) {
   const errors = [];
   const validatedData = {};
@@ -41,6 +44,11 @@ function validateRequestBody(body, rules) {
         errors.push(`El campo '${field}' no debe exceder los ${rule.maxLength} caracteres.`);
         continue;
       }
+
+      if (rule.regex && !rule.regex.test(value)) {
+        errors.push(`El campo '${field}' tiene un formato inválido.`);
+        continue;
+      }
     }
 
     validatedData[field] = value;
@@ -49,7 +57,7 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// metodo get: Obtener todos los detalles de usuario
+// Método GET: Obtener todos los detalles de usuario
 export async function GET() {
   try {
     const userDetails = await prisma.tbuserdetails.findMany({
@@ -63,6 +71,14 @@ export async function GET() {
         position: true,
         salary: true,
         status: true,
+        tbUsers: {
+          select: {
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
 
@@ -72,7 +88,7 @@ export async function GET() {
   }
 }
 
-// metodo post: Crear un nuevo detalle de usuario
+// Método POST: Crear un nuevo detalle de usuario
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -82,8 +98,8 @@ export async function POST(request) {
       FK_user: { required: true, type: "number" },
       phoneNumber: { type: "string", maxLength: 15 },
       address: { type: "string", maxLength: 255 },
-      dateOfBirth: { type: "string" }, // Se espera una fecha en formato ISO
-      hireDate: { type: "string" }, // Se espera una fecha en formato ISO
+      dateOfBirth: { type: "string", regex: /^\d{4}-\d{2}-\d{2}$/ }, // YYYY-MM-DD
+      hireDate: { type: "string", regex: /^\d{4}-\d{2}-\d{2}$/ }, // YYYY-MM-DD
       position: { type: "string", maxLength: 80 },
       salary: { required: true, type: "string", maxLength: 30 },
       status: { type: "boolean" },
@@ -106,6 +122,18 @@ export async function POST(request) {
       salary,
       status,
     } = validation.validatedData;
+
+    // Verificar si el usuario asociado existe
+    const userExists = await prisma.tbUsers.findUnique({
+      where: { PK_user: FK_user },
+    });
+
+    if (!userExists) {
+      return NextResponse.json(
+        { message: `No se encontró un usuario con FK_user: ${FK_user}` },
+        { status: 404 }
+      );
+    }
 
     // Verificar si ya existe un detalle para el usuario
     const detailExists = await prisma.tbuserdetails.findUnique({

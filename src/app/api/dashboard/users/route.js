@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 import bcrypt from "bcrypt";
 
-// funcion para manejo de errores de forma centralizada
+// Función para manejar errores centralizados
 function handleError(error, message = "Error interno del servidor", status = 500) {
   return NextResponse.json(
     {
@@ -13,7 +13,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// Validar cuerpo de la solicitud con reglas
+// Función para validar el cuerpo de la solicitud con reglas
 function validateRequestBody(body, rules) {
   const errors = [];
   const validatedData = {};
@@ -55,17 +55,22 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// metodo get, que muestra todos los usuario
+// Método GET: Obtener todos los usuarios
 export async function GET() {
   try {
-    const users = await prisma.tbusers.findMany({
+    const users = await prisma.tbUsers.findMany({
       select: {
         PK_user: true,
-        FK_role: true,
-        CI: true,
+        username: true,
+        email: true,
         firstName: true,
         lastName: true,
-        email: true,
+        career: true,
+        age: true,
+        linkedin: true,
+        expertiseParagraph: true,
+        createdAt: true,
+        updatedAt: true,
         status: true,
       },
     });
@@ -76,19 +81,23 @@ export async function GET() {
   }
 }
 
-// Metodo post
+// Método POST: Crear un nuevo usuario
 export async function POST(request) {
   try {
     const body = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_role: { required: true, type: "number" },
-      firstName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      lastName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      CI: { required: true, type: "string", maxLength: 20 },
+      username: { required: true, type: "string", minLength: 3, maxLength: 50, regex: /^[a-zA-Z0-9_]+$/ },
       email: { required: true, type: "string", regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
       password: { required: true, type: "string", minLength: 8 },
+      firstName: { required: true, type: "string", maxLength: 10 },
+      lastName: { required: true, type: "string", maxLength: 10 },
+      career: { required: true, type: "string", maxLength: 20 },
+      age: { required: true, type: "number", minLength: 18 },
+      linkedin: { required: true, type: "string", maxLength: 20 },
+      expertiseParagraph: { required: true, type: "string", maxLength: 500 },
+      status: { required: true, type: "boolean" },
     });
 
     if (!validation.valid) {
@@ -98,22 +107,29 @@ export async function POST(request) {
       );
     }
 
-    const { FK_role, firstName, lastName, CI, email, password } = validation.validatedData;
+    const {
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      career,
+      age,
+      linkedin,
+      expertiseParagraph,
+      status,
+    } = validation.validatedData;
 
-    // Verrificion del email
-    const emailFound = await prisma.tbusers.findUnique({ where: { email } });
-    if (emailFound) {
-      return NextResponse.json(
-        { message: "El email ya está registrado" },
-        { status: 400 }
-      );
-    }
+    // Verificar si el email o username ya están registrados
+    const existingUser = await prisma.tbUsers.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+    });
 
-    // Verificar si el CI ya se registro
-    const CIExists = await prisma.tbusers.findUnique({ where: { CI } });
-    if (CIExists) {
+    if (existingUser) {
       return NextResponse.json(
-        { message: "El CI ya está registrado" },
+        { message: `El email o nombre de usuario ya está registrado` },
         { status: 400 }
       );
     }
@@ -122,20 +138,28 @@ export async function POST(request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crear el nuevo usuario
-    const newUser = await prisma.tbusers.create({
+    const newUser = await prisma.tbUsers.create({
       data: {
-        FK_role,
-        firstName,
-        lastName,
-        CI,
+        username,
         email,
         password: hashedPassword,
-        status: true, // Asume que un usuario esta activo de momento
+        firstName,
+        lastName,
+        career,
+        age,
+        linkedin,
+        expertiseParagraph,
+        status,
       },
     });
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
+    // Manejar errores de Prisma
+    if (error.code === "P2002") {
+      return handleError(error, "El email o nombre de usuario ya están registrados", 400);
+    }
+
     return handleError(error, "Error al registrar el usuario");
   }
 }

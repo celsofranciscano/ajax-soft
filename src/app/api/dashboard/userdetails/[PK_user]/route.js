@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 
-// funcion para manejar eerrores
+// Función para manejar errores
 function handleError(error, message = "Error interno del servidor", status = 500) {
+  if (error.code === "P2025") {
+    return NextResponse.json({ message: "Registro no encontrado" }, { status: 404 });
+  }
   return NextResponse.json(
     {
       message,
@@ -12,7 +15,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// Validar paramentro pk de forma dinamica
+// Validar parámetro PK_user de forma dinámica
 function validatePKUser(PK_user) {
   const id = Number(PK_user);
   if (isNaN(id) || id <= 0) {
@@ -21,7 +24,7 @@ function validatePKUser(PK_user) {
   return { valid: true, id };
 }
 
-// Validacion del cuerpo "datos"
+// Validar cuerpo de la solicitud
 function validateRequestBody(body, rules) {
   const errors = [];
   const validatedData = {};
@@ -53,7 +56,7 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// metodo get: para obtener un usuario especifico
+// Método GET: Obtener un detalle de usuario específico
 export async function GET(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
@@ -78,7 +81,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// metodo PUT: Actualizar completamente detalles de usuario
+// Método PUT: Actualizar completamente detalles de usuario
 export async function PUT(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
@@ -125,7 +128,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// Metodo PATCH: Actualizar parcialmente detalles de usuario
+// Método PATCH: Actualizar parcialmente detalles de usuario
 export async function PATCH(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);

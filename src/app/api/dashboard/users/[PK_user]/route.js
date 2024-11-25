@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 import bcrypt from "bcrypt";
 
-// Funcion para manejar errores centralizados
+// Función para manejar errores centralizados
 function handleError(error, message = "Error interno del servidor", status = 500) {
+  if (error.code === "P2025") {
+    // Error específico de Prisma: Registro no encontrado
+    return NextResponse.json({ message: "Usuario no encontrado" }, { status: 404 });
+  }
   return NextResponse.json(
     {
       message,
@@ -13,7 +17,7 @@ function handleError(error, message = "Error interno del servidor", status = 500
   );
 }
 
-// calidacion dinmico PK_user
+// Validar parámetro dinámico PK_user
 function validatePKUser(PK_user) {
   const id = Number(PK_user);
   if (isNaN(id) || id <= 0) {
@@ -64,7 +68,7 @@ function validateRequestBody(body, rules) {
   return { valid: errors.length === 0, errors, validatedData };
 }
 
-// metodo get
+// Método GET: Obtener un usuario específico
 export async function GET(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
@@ -72,15 +76,18 @@ export async function GET(request, { params }) {
       return NextResponse.json({ message: error }, { status: 400 });
     }
 
-    const user = await prisma.tbusers.findUnique({
+    const user = await prisma.tbUsers.findUnique({
       where: { PK_user: id },
       select: {
         PK_user: true,
-        FK_role: true,
-        CI: true,
+        username: true,
+        email: true,
         firstName: true,
         lastName: true,
-        email: true,
+        career: true,
+        age: true,
+        linkedin: true,
+        expertiseParagraph: true,
         status: true,
       },
     });
@@ -98,7 +105,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// Metodo put xd
+// Método PUT: Actualizar completamente un usuario
 export async function PUT(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
@@ -108,13 +115,16 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    // validar campos , tambien integracion de datos 
+    // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
-      FK_role: { required: true, type: "number" },
-      firstName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      lastName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      CI: { required: true, type: "string", maxLength: 20 },
+      username: { required: true, type: "string", minLength: 3, maxLength: 50 },
       email: { required: true, type: "string", regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+      firstName: { required: true, type: "string", maxLength: 10 },
+      lastName: { required: true, type: "string", maxLength: 10 },
+      career: { required: true, type: "string", maxLength: 20 },
+      age: { required: true, type: "number" },
+      linkedin: { required: true, type: "string", maxLength: 20 },
+      expertiseParagraph: { required: true, type: "string", maxLength: 500 },
       password: { required: true, type: "string", minLength: 8 },
       status: { required: true, type: "boolean" },
     });
@@ -131,7 +141,7 @@ export async function PUT(request, { params }) {
     // Hashear la contraseña antes de actualizar
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const updatedUser = await prisma.tbusers.update({
+    const updatedUser = await prisma.tbUsers.update({
       where: { PK_user: id },
       data: { ...rest, password: hashedPassword },
     });
@@ -142,7 +152,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-//  metodo PATCH: Actualizar parcialmente un usuario
+// Método PATCH: Actualizar parcialmente un usuario
 export async function PATCH(request, { params }) {
   try {
     const { valid, id, error } = validatePKUser(params.PK_user);
@@ -152,13 +162,16 @@ export async function PATCH(request, { params }) {
 
     const body = await request.json();
 
-    // Integracion de datos de una forma flexivle
+    // Validar cuerpo con reglas flexibles
     const validation = validateRequestBody(body, {
-      FK_role: { type: "number" },
-      firstName: { type: "string", minLength: 2, maxLength: 80 },
-      lastName: { type: "string", minLength: 2, maxLength: 80 },
-      CI: { type: "string", maxLength: 20 },
+      username: { type: "string", minLength: 3, maxLength: 50 },
       email: { type: "string", regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+      firstName: { type: "string", maxLength: 10 },
+      lastName: { type: "string", maxLength: 10 },
+      career: { type: "string", maxLength: 20 },
+      age: { type: "number" },
+      linkedin: { type: "string", maxLength: 20 },
+      expertiseParagraph: { type: "string", maxLength: 500 },
       password: { type: "string", minLength: 8 },
       status: { type: "boolean" },
     });
@@ -177,7 +190,7 @@ export async function PATCH(request, { params }) {
       updatedData.password = await bcrypt.hash(password, 10);
     }
 
-    const updatedUser = await prisma.tbusers.update({
+    const updatedUser = await prisma.tbUsers.update({
       where: { PK_user: id },
       data: updatedData,
     });
