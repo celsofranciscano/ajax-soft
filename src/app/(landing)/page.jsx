@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from "react";
 
 const PortfolioComplete = () => {
@@ -18,7 +17,7 @@ const PortfolioComplete = () => {
     {
       name: "Celso Franciscano",
       role: "CEO & Fundador",
-      image: "https://drive.google.com/file/d/1FMII1n67Hjv-erJnUOIOXoFDuq-cMmiZ/view?usp=drivesdk/150",
+      image: "https://scontent.fcbb3-1.fna.fbcdn.net/v/t1.6435-9/78260617_806892099764363_6626643996628221952_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_ohc=y6tbCsa-mdgQ7kNvgFMqWqw&_nc_zt=23&_nc_ht=scontent.fcbb3-1.fna&_nc_gid=Aak_1Y6iK9ZJMsbvn7WO_bG&oh=00_AYCNuNPCC8oEL6Q7k8zs9jvlKFXwPLleWEUxtA_oJsdBhg&oe=676A69CD/150",
       bio: "Apasionado por liderar proyectos innovadores. Más de 10 años de experiencia en desarrollo de software.",
       projects: ["Sistema de Gestión Empresarial", "Aplicación de Comercio Electrónico"],
     },
@@ -162,7 +161,7 @@ const PortfolioComplete = () => {
 
       {/* Hero Section */}
       <section className="bg-cover bg-center h-80 flex items-center justify-center relative" style={{ backgroundImage: "url('https://arctic-council.org/site/assets/files/9090/craig-mckay-gndl-el3n00-unsplash.1200x400.webp/1200x400')" }}>
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="absolute inset-0 bg-gray-500 bg-opacity-50"></div>
         <div className="relative text-center z-10">
           <h2 className="text-5xl font-bold mb-4 text-white">Bienvenidos a Ajax-Soft</h2>
           <p className="text-lg text-gray-200">Liderando soluciones tecnológicas para el futuro.</p>
@@ -170,7 +169,7 @@ const PortfolioComplete = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-gray-800 text-center">
+      <section id="about" className="py-20 bg-blue-500 text-center">
         <div className="container mx-auto px-6">
           <h3 className="text-4xl font-semibold text-white mb-6">¿Quiénes somos?</h3>
           <p className="text-lg text-gray-300 leading-relaxed max-w-3xl mx-auto">
@@ -224,7 +223,46 @@ const PortfolioComplete = () => {
             ))}
           </ul>
         </div>
+      </section> 
+       {/* Portafolio */}
+       <section id="portafolio" className="py-16 bg-blue-600">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-semibold">Nuestro Portafolio mas Destacado</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {[1, 2, 3].map((project, index) => (
+              <div key={index} className="bg-black p-4 rounded-lg shadow">
+                <img
+                  className="w-full h-40 object-cover rounded-md"
+                  src={`https://via.placeholder.com/300?text=Proyecto+${project}`}
+                  alt={`Proyecto ${project}`}
+                />
+                <h3 className="text-lg font-medium mt-4">Proyecto {project}</h3>
+                <p className="text-sm text-gray-600">Descripción breve del proyecto.</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
+       {/* Servicios */}
+       <section id="servicios" className="py-16 bg-gray-100">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-semibold">Nuestros Servicios</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {[
+              { icon: "💻", title: "Desarrollo Web", desc: "Sitios web modernos y responsivos." },
+              { icon: "📱", title: "Aplicaciones Móviles", desc: "Soluciones móviles personalizadas." },
+              { icon: "🔒", title: "Ciberseguridad", desc: "Protección para tus datos." },
+            ].map((service, index) => (
+              <div key={index} className="text-center bg-blue-500 p-6 rounded-lg shadow">
+                <div className="text-4xl">{service.icon}</div>
+                <h3 className="text-lg font-medium mt-4">{service.title}</h3>
+                <p className="text-gray-600 text-sm">{service.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
 
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-gray-900 text-center">
