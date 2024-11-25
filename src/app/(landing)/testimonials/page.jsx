@@ -18,7 +18,7 @@ export default function TestimonialsPage (){
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.29.59%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20a%20neutra.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
@@ -34,14 +34,15 @@ export default function TestimonialsPage (){
           {/* Testimonio 2 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex items-center mb-4">
+              <img src="" alt="" />
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.30.01%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20a%20neutra.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
               </div>
-              <p className="ml-4 text-gray-900 font-bold">Laura</p>
+              <p className="ml-4 text-gray-900 font-bold">Dante</p>
             </div>
             <p className="text-gray-600">
               “Como freelancer, esta plataforma me ha permitido conectar con empresas que realmente valoran mi trabajo. 
@@ -54,7 +55,7 @@ export default function TestimonialsPage (){
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.31.11%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20a%20neutra.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
@@ -72,12 +73,12 @@ export default function TestimonialsPage (){
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.31.12%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20a%20neutra.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
               </div>
-              <p className="ml-4 text-gray-900 font-bold">Mariana</p>
+              <p className="ml-4 text-gray-900 font-bold">Pablo</p>
             </div>
             <p className="text-gray-600">
               “He logrado colaborar en proyectos internacionales gracias a esta plataforma. 
@@ -90,12 +91,12 @@ export default function TestimonialsPage (){
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.31.58%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20diverse%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
               </div>
-              <p className="ml-4 text-gray-900 font-bold">Sofía</p>
+              <p className="ml-4 text-gray-900 font-bold">Mark</p>
             </div>
             <p className="text-gray-600">
               “Publicar proyectos nunca fue tan sencillo. En pocos días encontré profesionales que se ajustaron a mis necesidades, 
@@ -108,7 +109,7 @@ export default function TestimonialsPage (){
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex justify-center items-center">
                 <img
-                  src="https://via.placeholder.com/40"
+                  src="https://raw.githubusercontent.com/Dylan4499/imagenes/refs/heads/main/DALL·E%202024-11-24%2023.32.00%20-%20A%20professional%20and%20friendly%20profile%20picture%20of%20a%20diverse%20person%2C%20suitable%20for%20use%20on%20a%20business%20or%20freelancer%20platform.%20The%20person%20is%20smiling%20and%20has%20.webp"
                   alt="Foto de Perfil"
                   className="rounded-full"
                 />
