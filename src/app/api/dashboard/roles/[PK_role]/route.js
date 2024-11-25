@@ -62,11 +62,6 @@ function validateRequestBody(body, rules) {
 // Método GET: Obtener un rol específico
 export async function GET(request, { params }) {
   try {
-    const { valid, id, error } = validatePKRole(params.PK_role);
-    if (!valid) {
-      return NextResponse.json({ message: error }, { status: 400 });
-    }
-
     const role = await prisma.tbroles.findUnique({
       where: { PK_role: id },
       include: {
@@ -79,15 +74,7 @@ export async function GET(request, { params }) {
         },
       },
     });
-
-    if (!role) {
-      return NextResponse.json(
-        { message: `No se encontró ningún rol con PK_role: ${id}` },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(role, { status: 200 });
+    return NextResponse.json(role);
   } catch (error) {
     return handleError(error, "Error al obtener el rol");
   }

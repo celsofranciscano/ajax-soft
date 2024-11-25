@@ -1,15 +1,7 @@
-"use client";// codigo de react , cuando hay eventos , cuando neseite
+"use client";
 import Link from "next/link";
-import { useEffect } from "react";
 
-// import { signOut } from "next-auth/react";
-// import { useSession } from "next-auth/react";
-import Image from "next/image";
-
-function Sidebar() {
-  // Contiene los datos del usuario
-//   const { data: session } = useSession();
-
+function NavBar() {
   function handlebtnclick() {
     document.getElementById("sidebar")?.classList.toggle("hidden");
     // document.getElementById("capa-sidebar")?.classList.toggle("hidden");
@@ -17,53 +9,39 @@ function Sidebar() {
   function btnclickperfil() {
     document.getElementById("card-perfil")?.classList.toggle("hidden");
   }
-  useEffect(() => {
-    document.documentElement.classList.toggle(
-      "dark",
-      localStorage.getItem("theme") === "dark"
-    );
-  }, []);
-
-  function toggleTheme() {
-    localStorage.setItem(
-      "theme",
-      localStorage.getItem("theme") === "light" ? "dark" : "light"
-    );
-    document.documentElement.classList.toggle("dark");
-  }
 
   return (
     <>
       <header className="bg-zinc-950 border border-zinc-900 h-16 shadow-sm  text-white fixed w-full flex items-center justify-between px-4 md:px-8">
         <a className="flex gap-1 items-center" href="/dashboard">
           {/* <img className="w-12" src="/logo.png" alt="logo ajaxsoft" /> */}
-          <span className="text-2xl font-medium text-white ">
-            AjaxSoft
-          </span>
+          <span className="text-2xl font-medium text-white ">AjaxSoft</span>
         </a>
 
-        {/* <div className="flex items-center justify-center gap-4">
-          <p>{session?.user?.role}</p>
-          {session?.user?.image ? (
-            <Image
-              onClick={btnclickperfil}
-              className="w-9 h-9 rounded-full cursor-pointer"
-              src={session?.user?.image}
-              width={24}
-              height={24}
-              alt="perfil"
-            />
-          ) : (
-            <div
-              onClick={btnclickperfil}
-              className="w-9 h-9 rounded-full cursor-pointer bg-zinc-800 flex items-center justify-center "
-            >
-              <h1 className=" text-center text-xl">
-                {session?.user?.name?.charAt(0)?.toUpperCase() || ""}
-              </h1>
-            </div>
-          )}
+        <nav>
+          <ul className="flex items-center gap-4 ">
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/"}>Inicio</Link>
+            </li>
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/about"}>Quienes somos</Link>
+            </li>
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/services"}>Servicios</Link>
+            </li>
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/portfolio"}>Portolio</Link>
+            </li>
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/contact"}>Contacto</Link>
+            </li>
+            <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
+              <Link href={"/testimonials"}>Testimonio</Link>
+            </li>
+          </ul>
+        </nav>
 
+        <div className="flex items-center justify-center gap-4">
           <button
             onClick={handlebtnclick}
             className="md:hidden bg-zinc-800 rounded-full p-0.5"
@@ -85,7 +63,7 @@ function Sidebar() {
               />
             </svg>
           </button>
-        </div> */}
+        </div>
       </header>
 
       <div
@@ -96,7 +74,7 @@ function Sidebar() {
 
       <aside
         id="sidebar"
-        className="bg-zinc-950 border-r border-zinc-800 w-72 md:w-60  h-screen text-white   fixed top-16  hidden  md:block px-4 py-8"
+        className="bg-zinc-950 border-r border-zinc-800 w-72 md:w-60  h-screen text-white   fixed top-16  hidden  md:hidden px-4 py-8"
       >
         <nav className="">
           <ul className="grid  pt-8 ">
@@ -341,7 +319,6 @@ function Sidebar() {
             </Link>
           </li>
 
-        
           {/* <li onClick={() => signOut()} className=" cursor-pointer"> */}
           <li className=" cursor-pointer">
             <button className="text-red-500 flex items-center">
@@ -371,4 +348,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar;
+export default NavBar;

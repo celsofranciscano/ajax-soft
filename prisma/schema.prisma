@@ -177,13 +177,16 @@ model tbuserdetails {
   FK_user     Int       @unique
   phoneNumber String?   @db.VarChar(15)
   address     String?   @db.VarChar(255)
-  dateOfBirth DateTime?
-  hireDate    DateTime?
-  position    String?   @db.VarChar(80)
-  salary      String    @db.VarChar(30)
+  github      String?   @db.VarChar(255)
+  linkedin    String?   @db.VarChar(255)
+  instagram   String?   @db.VarChar(255)
+  web         String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
   status      Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime?
+  tbusers     tbusers   @relation(fields: [FK_user], references: [PK_user])
+}
 
   tbUsers tbUsers @relation("UserDetails", fields: [FK_user], references: [PK_user])
 }

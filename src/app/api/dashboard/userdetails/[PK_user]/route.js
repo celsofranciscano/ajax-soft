@@ -59,11 +59,6 @@ function validateRequestBody(body, rules) {
 // Método GET: Obtener un detalle de usuario específico
 export async function GET(request, { params }) {
   try {
-    const { valid, id, error } = validatePKUser(params.PK_user);
-    if (!valid) {
-      return NextResponse.json({ message: error }, { status: 400 });
-    }
-
     const userDetails = await prisma.tbuserdetails.findUnique({
       where: { FK_user: id },
     });
@@ -122,9 +117,18 @@ export async function PUT(request, { params }) {
       },
     });
 
-    return NextResponse.json(updatedUserDetails, { status: 200 });
+    console.log(userDetails)
+    return NextResponse.json(userDetails);
   } catch (error) {
-    return handleError(error, "Error al actualizar completamente los detalles del usuario");
+    console.log(error)
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
@@ -136,43 +140,3 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ message: error }, { status: 400 });
     }
 
-    const body = await request.json();
-
-    // Validar cuerpo con reglas flexibles
-    const validation = validateRequestBody(body, {
-      phoneNumber: { type: "string", maxLength: 15 },
-      address: { type: "string", maxLength: 255 },
-      dateOfBirth: { type: "string" }, // Se espera formato ISO
-      hireDate: { type: "string" }, // Se espera formato ISO
-      position: { type: "string", maxLength: 80 },
-      salary: { type: "string", maxLength: 30 },
-      status: { type: "boolean" },
-    });
-
-    if (!validation.valid) {
-      return NextResponse.json(
-        { message: "Errores de validación", errors: validation.errors },
-        { status: 400 }
-      );
-    }
-
-    const dataToUpdate = {
-      ...validation.validatedData,
-      dateOfBirth: validation.validatedData.dateOfBirth
-        ? new Date(validation.validatedData.dateOfBirth)
-        : undefined,
-      hireDate: validation.validatedData.hireDate
-        ? new Date(validation.validatedData.hireDate)
-        : undefined,
-    };
-
-    const updatedUserDetails = await prisma.tbuserdetails.update({
-      where: { FK_user: id },
-      data: dataToUpdate,
-    });
-
-    return NextResponse.json(updatedUserDetails, { status: 200 });
-  } catch (error) {
-    return handleError(error, "Error al actualizar parcialmente los detalles del usuario");
-  }
-}

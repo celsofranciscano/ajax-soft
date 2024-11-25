@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
-import bcrypt from "bcrypt";
 
 // Función para manejar errores centralizados
 function handleError(error, message = "Error interno del servidor", status = 500) {
@@ -91,15 +90,7 @@ export async function GET(request, { params }) {
         status: true,
       },
     });
-
-    if (!user) {
-      return NextResponse.json(
-        { message: `No se encontró ningún usuario con PK_user: ${id}` },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(user, { status: 200 });
+    return NextResponse.json(user);
   } catch (error) {
     return handleError(error, "Error al obtener el usuario");
   }

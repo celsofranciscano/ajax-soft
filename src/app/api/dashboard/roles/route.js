@@ -106,7 +106,14 @@ export async function POST(request) {
 
     return NextResponse.json(newRole, { status: 201 });
   } catch (error) {
-    return handleError(error, "Error al crear el rol");
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 

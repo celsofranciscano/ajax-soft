@@ -57,6 +57,7 @@ function validateRequestBody(body, rules) {
 
 // Método GET: Obtener todos los usuarios
 export async function GET() {
+
   try {
     const users = await prisma.tbUsers.findMany({
       select: {
@@ -75,16 +76,23 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(users, { status: 200 });
+    return NextResponse.json(users);
   } catch (error) {
-    return handleError(error, "Error al obtener los usuarios");
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
 // Método POST: Crear un nuevo usuario
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const { FK_role, firstName, lastName, CI, email, password } = await request.json();
 
     // Validar cuerpo con reglas
     const validation = validateRequestBody(body, {
@@ -102,7 +110,7 @@ export async function POST(request) {
 
     if (!validation.valid) {
       return NextResponse.json(
-        { message: "Errores de validación", errors: validation.errors },
+        { message: "Todos los campos son obligatorios" },
         { status: 400 }
       );
     }
@@ -134,6 +142,14 @@ export async function POST(request) {
       );
     }
 
+    // Validar que la contraseña tenga al menos 6 caracteres
+    if (password.length < 8) {
+      return NextResponse.json(
+        { message: "La contraseña debe tener al menos 6 caracteres" },
+        { status: 400 }
+      );
+    }
+
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -153,7 +169,8 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    // Devolver el usuario creado
+    return NextResponse.json(newUser);
   } catch (error) {
     // Manejar errores de Prisma
     if (error.code === "P2002") {

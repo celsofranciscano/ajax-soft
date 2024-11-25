@@ -10,6 +10,9 @@ npm run dev
 yarn dev
 # or
 pnpm dev
+# Migrate
+
+npx prisma migrate dev --name init
 # or
 bun dev
 ```
