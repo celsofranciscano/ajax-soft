@@ -14,11 +14,11 @@ function NavBar() {
     <>
       <header className="bg-zinc-950 border border-zinc-900 h-16 shadow-sm  text-white fixed w-full flex items-center justify-between px-4 md:px-8">
         <a className="flex gap-1 items-center" href="/dashboard">
-          {/* <img className="w-12" src="/logo.png" alt="logo ajaxsoft" /> */}
+          <img className="w-12" src="/logo.webp" alt="logo ajaxsoft" />
           <span className="text-2xl font-medium text-white ">AjaxSoft</span>
         </a>
 
-        <nav>
+        <nav className="hidden md:block">
           <ul className="flex items-center gap-4 ">
             <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
               <Link href={"/"}>Inicio</Link>
@@ -30,18 +30,21 @@ function NavBar() {
               <Link href={"/services"}>Servicios</Link>
             </li>
             <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
-              <Link href={"/portfolio"}>Portolio</Link>
+              <Link href={"/portfolio"}>Portafolio</Link>
             </li>
             <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
               <Link href={"/contact"}>Contacto</Link>
             </li>
             <li className="hover:bg-zinc-800 rounded-md px-2 py-1">
-              <Link href={"/testimonials"}>Testimonio</Link>
+              <Link href={"/testimonials"}>Testimonios</Link>
             </li>
           </ul>
         </nav>
 
         <div className="flex items-center justify-center gap-4">
+          <button className="bg-blue-500 rounded-md text-white px-3 py-1">
+            Contactanos
+          </button>
           <button
             onClick={handlebtnclick}
             className="md:hidden bg-zinc-800 rounded-full p-0.5"
@@ -128,7 +131,7 @@ function NavBar() {
                   />
                 </svg>
 
-                <span>Administradores</span>
+                <span>Quienes somos</span>
               </Link>
             </li>
             <li className=" hover:bg-zinc-950 rounded-md px-4 py-2">
@@ -155,7 +158,7 @@ function NavBar() {
                   />
                 </svg>
 
-                <span>Ventas</span>
+                <span>Servicios</span>
               </Link>
             </li>
             <li className=" hover:bg-zinc-950 rounded-md px-4 py-2">
@@ -182,7 +185,7 @@ function NavBar() {
                   />
                 </svg>
 
-                <span>Productos</span>
+                <span>Portafolio</span>
               </Link>
             </li>
             <li className=" hover:bg-zinc-950 rounded-md px-4 py-2">
@@ -208,7 +211,7 @@ function NavBar() {
                   />
                 </svg>
 
-                <span>Clientes</span>
+                <span>Contactos</span>
               </Link>
             </li>
             <li className=" hover:bg-zinc-950 rounded-md px-4 py-2">
@@ -235,7 +238,7 @@ function NavBar() {
                   />
                 </svg>
 
-                <span>Transacciones</span>
+                <span>Testimonios</span>
               </Link>
             </li>
           </ul>

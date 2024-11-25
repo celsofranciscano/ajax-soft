@@ -1,4 +1,3 @@
-
 function LandingPage() {
   return (
     <main className="grid gap-8">
@@ -9,9 +8,7 @@ function LandingPage() {
           className="w-full object-cover md:order-2"
         />
         <div className="flex  flex-col justify-center items-center md:items-start space-y-4 text-black dark:text-white">
-          <p className=" text-lg md:text-xl">
-            ✨ Explora Nuestros Servicios
-          </p>
+          <p className=" text-lg md:text-xl">🧑‍💻 Explora Nuestros Servicios</p>
 
           <h1 className="text-3xl md:text-4xl font-medium ">
             Desarrollo web a medida
@@ -156,7 +153,6 @@ function LandingPage() {
       <h1 className="text-black dark:text-white font-medium text-xl">
         Nuevas prendas
       </h1>
-
     </main>
   );
 }
