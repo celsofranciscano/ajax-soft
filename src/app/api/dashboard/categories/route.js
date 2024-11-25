@@ -3,8 +3,8 @@ import prisma from "@/libs/db";
 
 export async function GET() {
   try {
-    const roles = await prisma.tbroles.findMany();
-    return NextResponse.json(roles);
+    const categories = await prisma.tbcategories.findMany();
+    return NextResponse.json(categories);
   } catch (error) {
     return NextResponse.json(
       {
