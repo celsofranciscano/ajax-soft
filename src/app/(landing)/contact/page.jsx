@@ -17,7 +17,10 @@ function ContactPage() {
     console.log(data);
     setIsLoading(true);
     try {
-        const result = await axios.post("http://localhost:3000/api/dashboard/customers", data);
+      const result = await axios.post(
+        "http://localhost:3000/api/dashboard/customers",
+        data
+      );
       console.log("Formulario enviado:", result);
     } catch (err) {
       console.log("Error al enviar el formulario:", err);
