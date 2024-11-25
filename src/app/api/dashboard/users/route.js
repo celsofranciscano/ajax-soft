@@ -2,106 +2,64 @@ import { NextResponse } from "next/server";
 import prisma from "@/libs/db";
 import bcrypt from "bcrypt";
 
-// funcion para manejo de errores de forma centralizada
-function handleError(error, message = "Error interno del servidor", status = 500) {
-  return NextResponse.json(
-    {
-      message,
-      error: error.message || "Error desconocido",
-    },
-    { status }
-  );
-}
-
-// Validar cuerpo de la solicitud con reglas
-function validateRequestBody(body, rules) {
-  const errors = [];
-  const validatedData = {};
-
-  for (const field in rules) {
-    const rule = rules[field];
-    const value = body[field];
-
-    if (rule.required && (value === undefined || value === null)) {
-      errors.push(`El campo '${field}' es obligatorio.`);
-      continue;
-    }
-
-    if (value !== undefined) {
-      if (rule.type && typeof value !== rule.type) {
-        errors.push(`El campo '${field}' debe ser de tipo ${rule.type}.`);
-        continue;
-      }
-
-      if (rule.minLength && value.length < rule.minLength) {
-        errors.push(`El campo '${field}' debe tener al menos ${rule.minLength} caracteres.`);
-        continue;
-      }
-
-      if (rule.maxLength && value.length > rule.maxLength) {
-        errors.push(`El campo '${field}' no debe exceder los ${rule.maxLength} caracteres.`);
-        continue;
-      }
-
-      if (rule.regex && !rule.regex.test(value)) {
-        errors.push(`El campo '${field}' tiene un formato inválido.`);
-        continue;
-      }
-    }
-
-    validatedData[field] = value;
-  }
-
-  return { valid: errors.length === 0, errors, validatedData };
-}
-
-// metodo get, que muestra todos los usuario
 export async function GET() {
+
   try {
     const users = await prisma.tbusers.findMany({
       select: {
         PK_user: true,
         FK_role: true,
         CI: true,
-        firstName: true,
+        firstName: true,  
         lastName: true,
         email: true,
         status: true,
       },
     });
 
-    return NextResponse.json(users, { status: 200 });
+    return NextResponse.json(users);
   } catch (error) {
-    return handleError(error, "Error al obtener los usuarios");
+    return NextResponse.json(
+      {
+        error: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 
-// Metodo post
+
+
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const { FK_role, firstName, lastName, CI, email, password } = await request.json();
 
-    // Validar cuerpo con reglas
-    const validation = validateRequestBody(body, {
-      FK_role: { required: true, type: "number" },
-      firstName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      lastName: { required: true, type: "string", minLength: 2, maxLength: 80 },
-      CI: { required: true, type: "string", maxLength: 20 },
-      email: { required: true, type: "string", regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-      password: { required: true, type: "string", minLength: 8 },
-    });
-
-    if (!validation.valid) {
+    // Validar que todos los campos requeridos estén presentes
+    if (!FK_role || !firstName || !lastName || !CI || !email || !password) {
       return NextResponse.json(
-        { message: "Errores de validación", errors: validation.errors },
+        { message: "Todos los campos son obligatorios" },
         { status: 400 }
       );
     }
 
-    const { FK_role, firstName, lastName, CI, email, password } = validation.validatedData;
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { message: "Formato de email inválido" },
+        { status: 400 }
+      );
+    }
 
-    // Verrificion del email
-    const emailFound = await prisma.tbusers.findUnique({ where: { email } });
+    // Verificar si el email ya está registrado en la base de datos
+    const emailFound = await prisma.tbusers.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
     if (emailFound) {
       return NextResponse.json(
         { message: "El email ya está registrado" },
@@ -109,11 +67,24 @@ export async function POST(request) {
       );
     }
 
-    // Verificar si el CI ya se registro
-    const CIExists = await prisma.tbusers.findUnique({ where: { CI } });
-    if (CIExists) {
+    // Verificar si el CI ya está registrado en la base de datos
+    const CIExists = await prisma.tbusers.findMany({
+      where: {
+        CI: CI,
+      },
+    });
+
+    if (CIExists.length >= 1) {
       return NextResponse.json(
         { message: "El CI ya está registrado" },
+        { status: 400 }
+      );
+    }
+
+    // Validar que la contraseña tenga al menos 6 caracteres
+    if (password.length < 8) {
+      return NextResponse.json(
+        { message: "La contraseña debe tener al menos 6 caracteres" },
         { status: 400 }
       );
     }
@@ -121,21 +92,35 @@ export async function POST(request) {
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear el nuevo usuario
+    // Crear el nuevo usuario en la base de datos
     const newUser = await prisma.tbusers.create({
       data: {
-        FK_role,
+        FK_role: Number(FK_role),
         firstName,
         lastName,
         CI,
         email,
         password: hashedPassword,
-        status: true, // Asume que un usuario esta activo de momento
+        // Añade otras propiedades del usuario si es necesario
       },
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    // Devolver el usuario creado
+    return NextResponse.json(newUser);
   } catch (error) {
-    return handleError(error, "Error al registrar el usuario");
+    // Controlar errores inesperados
+    console.error("Error al registrar el usuario:", error);
+
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { message: "Este email ya está registrado en el sistema" },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: error.message +"Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
