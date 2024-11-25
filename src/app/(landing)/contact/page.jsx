@@ -9,9 +9,11 @@ function ContactPage() {
     handleSubmit,
     register,
     formState: { errors },
+    reset, // Usado para limpiar el formulario
   } = useForm();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(""); // Estado para el mensaje de éxito
 
   async function onSubmit(data) {
     console.log(data);
@@ -22,6 +24,8 @@ function ContactPage() {
         data
       );
       console.log("Formulario enviado:", result);
+      setSuccessMessage("Los datos se enviaron correctamente."); // Mostrar mensaje de éxito
+      reset(); // Limpiar el formulario
     } catch (err) {
       console.log("Error al enviar el formulario:", err);
     } finally {
@@ -41,6 +45,13 @@ function ContactPage() {
         <h1 className="text-black dark:text-white font-normal text-lg pb-4 border-b dark:border-zinc-800">
           Completa los datos
         </h1>
+
+        {/* Mostrar mensaje de éxito si se envió el formulario correctamente */}
+        {successMessage && (
+          <div className="bg-blue-500 text-white p-4 rounded-md mb-4">
+            {successMessage}
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -111,6 +122,7 @@ function ContactPage() {
               </span>
             )}
           </label>
+          
           {/* Número de Teléfono */}
           <label className="flex flex-col gap-1">
             Teléfono
